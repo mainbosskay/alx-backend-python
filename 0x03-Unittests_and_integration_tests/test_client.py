@@ -16,12 +16,12 @@ class TestGithubOrgClient(unittest.TestCase):
         ("abc", {'login': "abc"}),
     ])
     @patch("client.get_json")
-    def test_org(self, org: str, respMock: Dict, getMock: MagicMock) -> None:
+    def test_org(self, org: str, mockResp: Dict, mockGet: MagicMock) -> None:
         """Testing for GithubOrgClient class the org method"""
-        getMock.return_value = MagicMock(return_value=respMock)
+        mockGet.return_value = MagicMock(return_value=mockResp)
         instClient = GithubOrgClient(org)
-        self.assertEqual(instClient.org(), respMock)
-        getMock.assert_called_once_with(f"https://api.github.com/orgs/{org}")
+        self.assertEqual(instClient.org(), mockResp)
+        mockGet.assert_called_once_with(f"https://api.github.com/orgs/{org}")
 
     def test_public_repos_url(self) -> None:
         """Testing for GithubOrgClient class the public_repos_url method"""
@@ -34,9 +34,9 @@ class TestGithubOrgClient(unittest.TestCase):
                              "https://api.github.com/users/google/repos")
 
     @patch("client.get_json")
-    def test_public_repos(self, getmock_json: MagicMock) -> None:
+    def test_public_repos(self, mockget_json: MagicMock) -> None:
         """Testing for GithubOrgClient class the public_repos method"""
-        respMock = {
+        mockResp = {
             'repos_url': "https://api.github.com/users/google/repos",
             'repos': [
                 {
@@ -73,14 +73,14 @@ class TestGithubOrgClient(unittest.TestCase):
                 },
             ]
         }
-        getmock_json.return_value = respMock["repos"]
+        mockget_json.return_value = mockResp["repos"]
         with patch("client.GithubOrgClient._public_repos_url",
                    new_callable=PropertyMock) as mockReposUrl:
-            mockReposUrl.return_value = respMock["repos_url"]
+            mockReposUrl.return_value = mockResp["repos_url"]
             self.assertEqual(GithubOrgClient("google").public_repos(),
                              ["episodes.dart", "kratu"])
             mockReposUrl.assert_called_once()
-        getmock_json.assert_called_once()
+        mockget_json.assert_called_once()
 
     @parameterized.expand([
         ({'license': {'key': "bsd-3-clause"}}, "bsd-3-clause", True),
