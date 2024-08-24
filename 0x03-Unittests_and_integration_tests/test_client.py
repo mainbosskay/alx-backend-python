@@ -16,12 +16,12 @@ class TestGithubOrgClient(unittest.TestCase):
         ("abc", {'login': "abc"}),
     ])
     @patch("client.get_json")
-    def test_org(self, org: str, mockResp: Dict, mockGet: MagicMock) -> None:
+    def test_org(self, org: str, respMock: Dict, getMock: MagicMock) -> None:
         """Testing for GithubOrgClient class the org method"""
-        mockGet.return_value = MagicMock(return_value=mockResp)
+        getMock.return_value = MagicMock(return_value=respMock)
         instClient = GithubOrgClient(org)
-        self.assertEqual(instClient.org(), mockResp)
-        mockGet.assert_called_once_with(f"https://api.github.com/orgs/{org}")
+        self.assertEqual(instClient.org(), respMock)
+        getMock.assert_called_once_with(f"https://api.github.com/orgs/{org}")
 
     def test_public_repos_url(self) -> None:
         """Testing for GithubOrgClient class the public_repos_url method"""
@@ -36,7 +36,7 @@ class TestGithubOrgClient(unittest.TestCase):
     @patch("client.get_json")
     def test_public_repos(self, mockget_json: MagicMock) -> None:
         """Testing for GithubOrgClient class the public_repos method"""
-        mockResp = {
+        respMock = {
             'repos_url': "https://api.github.com/users/google/repos",
             'repos': [
                 {
@@ -73,10 +73,10 @@ class TestGithubOrgClient(unittest.TestCase):
                 },
             ]
         }
-        mockget_json.return_value = mockResp["repos"]
+        mockget_json.return_value = respMock["repos"]
         with patch("client.GithubOrgClient._public_repos_url",
                    new_callable=PropertyMock) as mockReposUrl:
-            mockReposUrl.return_value = mockResp["repos_url"]
+            mockReposUrl.return_value = respMock["repos_url"]
             self.assertEqual(GithubOrgClient("google").public_repos(),
                              ["episodes.dart", "kratu"])
             mockReposUrl.assert_called_once()
@@ -105,7 +105,7 @@ class TestGithubOrgClient(unittest.TestCase):
         @classmethod
         def setUpClass(cls) -> None:
             """SetsUp before running tests the class-level fixtures"""
-            mock_ routes = {
+            mock_routes = {
                 "https://api.github.com/orgs/google": cls.org_payload,
                 "https://api.github.com/orgs/google/repos": cls.repos_payload
             }
